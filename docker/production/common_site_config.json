@@ -1,0 +1,37 @@
+{
+  "db_host": "db",
+  "db_port": 5432,
+  "db_type": "postgres",
+  "redis_cache": "redis://redis-cache:6379",
+  "redis_queue": "redis://redis-queue:6379",
+  "redis_socketio": "redis://redis-socketio:6379",
+  "socketio_port": 9000,
+  "auto_migrate": 1,
+  "serve_default_site": true,
+  "restart_supervisor_on_update": false,
+  "restart_systemd_on_update": false,
+  "update_bench_on_update": true,
+  "shallow_clone": true,
+  "background_workers": 1,
+  "gunicorn_workers": 4,
+  "logging": {
+    "level": "INFO",
+    "formatters": {
+      "verbose": {
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      }
+    }
+  },
+  "mail_server": "localhost",
+  "mail_port": 587,
+  "use_tls": 1,
+  "developer_mode": 0,
+  "admin_password": "admin",
+  "encryption_key": "",
+  "host_name": "https://localhost",
+  "http_timeout": 120,
+  "limits": {
+    "pause_scheduler_if_cpu_usage_above": 80,
+    "pause_scheduler_if_ram_usage_above": 80
+  }
+}

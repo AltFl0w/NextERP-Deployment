@@ -1,0 +1,265 @@
+version: '3.8'
+
+services:
+  # ERPNext Application (built from your Git repo)
+  erpnext:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
+        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-erpnext}
+      - DB_USER=${DB_USER:-erpnext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SOCKETIO_PORT=9000
+      - AUTO_MIGRATE=1
+      - SITE_NAME=${SITE_NAME:-localhost}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+      redis-socketio:
+        condition: service_started
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext-network
+    labels:
+      # Dokploy/Traefik labels for automatic SSL and routing
+      - "traefik.enable=true"
+      - "traefik.http.routers.erpnext.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.erpnext.tls=true"
+      - "traefik.http.routers.erpnext.tls.certresolver=letsencrypt"
+      - "traefik.http.services.erpnext.loadbalancer.server.port=8000"
+
+  # Queue Worker - Default
+  queue-default:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
+        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+    restart: unless-stopped
+    command: ["/usr/local/bin/worker-entrypoint.sh", "default"]
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-erpnext}
+      - DB_USER=${DB_USER:-erpnext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SITE_NAME=${SITE_NAME:-localhost}
+    depends_on:
+      - db
+      - redis-queue
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext-network
+
+  # Queue Worker - Short
+  queue-short:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
+        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+    restart: unless-stopped
+    command: ["/usr/local/bin/worker-entrypoint.sh", "short"]
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-erpnext}
+      - DB_USER=${DB_USER:-erpnext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SITE_NAME=${SITE_NAME:-localhost}
+    depends_on:
+      - db
+      - redis-queue
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext-network
+
+  # Queue Worker - Long
+  queue-long:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
+        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+    restart: unless-stopped
+    command: ["/usr/local/bin/worker-entrypoint.sh", "long"]
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-erpnext}
+      - DB_USER=${DB_USER:-erpnext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SITE_NAME=${SITE_NAME:-localhost}
+    depends_on:
+      - db
+      - redis-queue
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext-network
+
+  # Scheduler
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
+        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+    restart: unless-stopped
+    command: ["./env/bin/python", "-c", "import frappe; frappe.init_site(); frappe.utils.scheduler.start_scheduler()"]
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-erpnext}
+      - DB_USER=${DB_USER:-erpnext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SITE_NAME=${SITE_NAME:-localhost}
+    depends_on:
+      - db
+      - redis-queue
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext-network
+
+  # WebSocket Server
+  websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
+        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+    restart: unless-stopped
+    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-erpnext}
+      - DB_USER=${DB_USER:-erpnext}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SOCKETIO_PORT=9000
+      - SITE_NAME=${SITE_NAME:-localhost}
+    depends_on:
+      - db
+      - redis-socketio
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.websocket.rule=Host(`${DOMAIN}`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.websocket.tls=true"
+      - "traefik.http.routers.websocket.tls.certresolver=letsencrypt"
+      - "traefik.http.services.websocket.loadbalancer.server.port=9000"
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-erpnext}
+      POSTGRES_USER: ${DB_USER:-erpnext}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - erpnext-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-erpnext} -d ${DB_NAME:-erpnext}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis-cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --save ""
+    volumes:
+      - redis-cache-data:/data
+    networks:
+      - erpnext-network
+
+  # Redis Queue
+  redis-queue:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-queue-data:/data
+    networks:
+      - erpnext-network
+
+  # Redis SocketIO
+  redis-socketio:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save ""
+    volumes:
+      - redis-socketio-data:/data
+    networks:
+      - erpnext-network
+
+volumes:
+  db-data:
+    driver: local
+  redis-cache-data:
+    driver: local
+  redis-queue-data:
+    driver: local
+  redis-socketio-data:
+    driver: local
+  sites:
+    driver: local
+  logs:
+    driver: local
+
+networks:
+  erpnext-network:
+    driver: bridge

@@ -1,0 +1,50 @@
+# Environment variables (contains sensitive data)
+.env
+
+# Docker volumes and data
+volumes/
+data/
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*.sql
+*.gz
+backups/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Docker-related
+.dockerignore
+docker-compose.override.yml
+
+# Site-specific data (if running locally)
+sites/
+bench-repo/
+
+# SSL certificates (if stored locally)
+*.pem
+*.key
+*.crt
+certs/
