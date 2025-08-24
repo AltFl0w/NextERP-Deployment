@@ -27,7 +27,6 @@ RUN echo "erpnext" >> sites/apps.txt
 RUN cd apps/frappe && yarn install --frozen-lockfile
 RUN cd apps/erpnext && yarn install --frozen-lockfile
 RUN cd apps/frappe && yarn build
-RUN cd apps/erpnext && yarn build
 
 # Production stage
 FROM python:3.11-slim-bullseye as production
