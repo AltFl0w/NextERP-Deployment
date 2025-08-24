@@ -51,6 +51,9 @@ WORKDIR /home/frappe/frappe-bench
 # Copy built assets from previous stage
 COPY --from=assets --chown=frappe:frappe /home/frappe/frappe-bench/apps ./apps
 
+# Ensure frappe user owns the entire directory
+RUN chown -R frappe:frappe /home/frappe/frappe-bench
+
 # Install Python dependencies
 USER frappe
 RUN python -m venv env
