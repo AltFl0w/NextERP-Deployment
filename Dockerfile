@@ -14,11 +14,9 @@ WORKDIR /home/frappe/frappe-bench
 # Clone Frappe framework (required for ERPNext)
 RUN git clone https://github.com/frappe/frappe --branch version-15 --depth 1 apps/frappe
 
-# Clone ERPNext from your forked repository
-# AltFl0w/NextERP - your custom ERPNext fork
-ARG ERPNEXT_REPO_URL=https://github.com/AltFl0w/NextERP.git
-ARG ERPNEXT_BRANCH=version-15
-RUN git clone ${ERPNEXT_REPO_URL} --branch ${ERPNEXT_BRANCH} --depth 1 apps/erpnext
+# Clone ERPNext from official repository (temporarily until NextERP fork is ready)
+# Will use your fork once it's properly set up
+RUN git clone https://github.com/frappe/erpnext --branch version-15 --depth 1 apps/erpnext
 
 # Install Node dependencies and build assets
 RUN cd apps/frappe && yarn install --frozen-lockfile
