@@ -70,12 +70,13 @@ RUN mkdir -p sites/assets
 
 # Copy configuration files
 COPY --chown=frappe:frappe docker/production/common_site_config.json sites/common_site_config.json
+COPY --chown=frappe:frappe docker/production/erpnext-entrypoint.sh /usr/local/bin/erpnext-entrypoint.sh
 COPY --chown=frappe:frappe docker/production/nginx-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
 COPY --chown=frappe:frappe docker/production/worker-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
 
 # Make scripts executable
 USER root
-RUN chmod +x /usr/local/bin/nginx-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
+RUN chmod +x /usr/local/bin/erpnext-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
 
 # Install nginx
 RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*

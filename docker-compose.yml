@@ -6,10 +6,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
-        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+      target: production
     restart: unless-stopped
+    command: ["/usr/local/bin/erpnext-entrypoint.sh"]
     environment:
       - DB_HOST=db
       - DB_PORT=5432
@@ -50,9 +49,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
-        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+      target: production
     restart: unless-stopped
     command: ["/usr/local/bin/worker-entrypoint.sh", "default"]
     environment:
@@ -79,9 +76,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
-        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+      target: production
     restart: unless-stopped
     command: ["/usr/local/bin/worker-entrypoint.sh", "short"]
     environment:
@@ -108,9 +103,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
-        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+      target: production
     restart: unless-stopped
     command: ["/usr/local/bin/worker-entrypoint.sh", "long"]
     environment:
@@ -137,9 +130,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
-        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+      target: production
     restart: unless-stopped
     command: ["./env/bin/python", "-c", "import frappe; frappe.init_site(); frappe.utils.scheduler.start_scheduler()"]
     environment:
@@ -166,9 +157,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        ERPNEXT_REPO_URL: ${ERPNEXT_REPO_URL:-https://github.com/AltFl0w/NextERP.git}
-        ERPNEXT_BRANCH: ${ERPNEXT_BRANCH:-version-15}
+      target: production
     restart: unless-stopped
     command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
     environment:
