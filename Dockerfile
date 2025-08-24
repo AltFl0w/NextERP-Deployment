@@ -18,6 +18,11 @@ RUN git clone https://github.com/frappe/frappe --branch version-15 --depth 1 app
 # Will use your fork once it's properly set up
 RUN git clone https://github.com/frappe/erpnext --branch version-15 --depth 1 apps/erpnext
 
+# Create sites directory and apps.txt file (required for Frappe build)
+RUN mkdir -p sites
+RUN echo "frappe" > sites/apps.txt
+RUN echo "erpnext" >> sites/apps.txt
+
 # Install Node dependencies and build assets
 RUN cd apps/frappe && yarn install --frozen-lockfile
 RUN cd apps/erpnext && yarn install --frozen-lockfile
